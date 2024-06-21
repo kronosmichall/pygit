@@ -1,16 +1,15 @@
-import argparse
-from gitparser import *
+#!/usr/bin/env python3
 
-def main(repo_path: str):
-    # repo = git.Repo(repo_path)
-    # print(repo.remotes.origin.url)
-    print("xd")
-    
+from simple_term_menu import TerminalMenu
+from gitparser import Repo
+def main():
+    repo = Repo()
+    # repo.fetch()
+    branches = repo.branches()
+    terminal_menu = TerminalMenu(branches)
+    menu_entry_index = terminal_menu.show()
+    print(f"You have selected {branches[menu_entry_index]}!")
+    repo.checkout(branches[menu_entry_index])
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="A simple CLI for git operations.")
-    parser.add_argument("--repo_path", type=str, default='.', help="Path to the git repository.")
-
-    args = parser.parse_args()
-
-    main(args.repo_path)
+    main()
