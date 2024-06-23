@@ -16,6 +16,16 @@ class Repo:
         self.email = result.stdout.strip()
 
 
+    def current_branch(self):
+        result = subprocess.run(
+            ["git", "branch", "--show-current"],
+            stdout=save,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+        
+
     def fetch(self):
         print("Fetching all remotes...")
         subprocess.run(
@@ -42,9 +52,15 @@ class Repo:
         output = result.stdout
         branches = output.split("\n")
         branches = [b for b in branches if b]
+
         my_branches = [b for b in branches if self.email in b.split("mail:")[1].split(" ")[0]]
         my_branches = sorted(my_branches)
-        
         names = [b.split(" ")[-1] for b in my_branches]
-        # print(names)
+        
+        current = self.current_branch()
+        if current in names:
+            names.remove(current)
+            names.insert(0, current)
+
         return names
+    
