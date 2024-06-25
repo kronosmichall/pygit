@@ -5,3 +5,12 @@ def get_suffix(str, prefix, strip=True):
     res = parts[1]
     res = res.strip() if strip else res
     return res
+
+def remove_duplicates(lst):
+    unique = []
+    last = None
+    for item in lst:
+        if item != last:
+            unique.append(item)
+            last = item
+    return unique
