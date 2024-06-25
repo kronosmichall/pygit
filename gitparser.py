@@ -1,10 +1,10 @@
-from singleton import singleton
+from functools import cache
+from text import get_suffix
 import subprocess
-
 silent = subprocess.DEVNULL
 save = subprocess.PIPE
 
-@singleton
+@cache
 class Repo:
     def __init__(self, repo_path: str = "."):
         result = subprocess.run(
@@ -40,6 +40,11 @@ class Repo:
             ["git", "checkout", branch],
             check=True
         )
+        subprocess.Popen(
+            ["git", "pull"],
+            stdout=silent,
+            stderr=silent
+        )
         
 
     def branches(self):
@@ -64,3 +69,26 @@ class Repo:
 
         return names
     
+    def entries(self):
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            stdout=save,
+            text=True,
+            check=True
+        )
+        
+        output = result.stdout
+        entries = output.split("\n")
+        
+        result = {}
+        result["added"] = {
+            "new": [get_suffix(e, "A") for e in entries if get_suffix(e, "A")],
+            "modified": [get_suffix(e, "M") for e in entries if get_suffix(e, "M")],
+            "deleted": [get_suffix(e, "D") for e in entries if get_suffix(e, "D")]
+        }
+        result["not_added"] = {
+            "new": [get_suffix(e, "??") for e in entries if get_suffix(e, "??")],
+            "modified": [get_suffix(e, " M") for e in entries if get_suffix(e, " M")],
+            "deleted": [get_suffix(e, " D") for e in entries if get_suffix(e, " D")]
+        }
+        return result
