@@ -1,6 +1,7 @@
 from functools import cache
 from text import get_suffix
 import subprocess
+
 silent = subprocess.DEVNULL
 save = subprocess.PIPE
 
@@ -49,7 +50,7 @@ class Repo:
 
     def branches(self):
         result = subprocess.run(
-            ['git', 'for-each-ref', '--sort=-committerdate', '--format=%(committerdate:iso8601) mail:%(authoremail) %(refname:short)', 'refs/heads/'],
+            ['git', 'for-each-ref', '--sort=-committerdate', '--format=%(committerdate:iso8601) mail:%(authoremail) %(refname:short)', 'refs/remotes/'],
             stdout=save, 
             text=True, 
             check=True
@@ -59,9 +60,9 @@ class Repo:
         branches = [b for b in branches if b]
 
         my_branches = [b for b in branches if self.email in b.split("mail:")[1].split(" ")[0]]
-        my_branches = sorted(my_branches)
         names = [b.split(" ")[-1] for b in my_branches]
-        
+        names = [n for n in names if n != "master"]
+        names = [get_suffix(n, "origin/") or n for n in names]
         current = self.current_branch()
         if current in names:
             names.remove(current)
